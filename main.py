@@ -32,7 +32,6 @@ def read_dictionary(path):
     :param path:
     :return:
     """
-
     with open(path, mode='r') as dictionary_file:
         # Read all lines from the file
         words = dictionary_file.readlines()
@@ -58,6 +57,32 @@ def encode_dictionary(words):
             # value.
             encoded_dictionary[word_encoding] = [word]
 
+    return encoded_dictionary
+
 
 def encode_word(word):
     return word
+
+
+def read_phone_numbers(path):
+    """Generator function that yields a phone numbers for each line in the file.
+
+    :param path:
+    :return:
+    """
+    with open(path, mode='r') as phone_numbers_file:
+        for line in phone_numbers_file:
+            yield line
+
+
+def get_phone_number_encodings(phone_number, encoding):
+    return []
+
+
+if __name__ == '__main__':
+    words = read_dictionary('')
+    encoding = encode_dictionary(words)
+
+    for phone_number in read_phone_numbers(''):
+        encodings = get_phone_number_encodings(phone_number, encoding)
+        print(encodings)
