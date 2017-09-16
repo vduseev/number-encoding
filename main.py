@@ -44,16 +44,16 @@ def inverse_initial_mapping(mapping):
     return inverse_mapping
 
 
-def read_dictionary_file(path):
-    """Read all the lines from the dictionary and return them as a list.
+def read_file_strip_endlines(path):
+    """Generator function that yields lines without \n and \r at the end.
 
     :param path:
     :return:
     """
 
     with open(path, mode='r') as dictionary_file:
-        # Read all lines from the file
-        words = dictionary_file.readlines()
+        for line in dictionary_file:
+            yield line.rstrip('\n').rstrip('\r')
 
     return words
 
@@ -113,20 +113,6 @@ def encode_word(word, mapping):
     return encoding
 
 
-def read_phone_numbers_file(path):
-    """Generator function that yields a phone numbers for each line in the file.
-
-    A phone number is an arbitrary(!) string of dashes - , slashes / and digits.
-
-    :param path:
-    :return:
-    """
-
-    with open(path, mode='r') as phone_numbers_file:
-        for line in phone_numbers_file:
-            yield line
-
-
 def strip_phone_number(phone_number):
     """ Strips phone number of the dashes and slashes.
 
@@ -140,7 +126,7 @@ def strip_phone_number(phone_number):
 def get_phone_number_encodings(phone_number, encoding_dictionary):
     """
 
-    TODO: almost infinite loop. We add stuff back to the queue. Probably, at
+    TODO: It's almost infinite loop. We add stuff back to the queue. Probably, at
     the end we will add just the empty sets. Queue will become empty, and we'll
     end up without any results.
 
@@ -149,11 +135,15 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
     :return:
     """
 
+    encodings = set()
     queue = {''}
 
     while queue:
         encoding = queue.pop()
         encoding_length = len(encoding.replace(' ', ''))
+
+        if encoding_length == len(phone_number):
+            encodings.add(encoding)
 
         # find fitting subencodings
         sub_encodings = get_encodings_fitting_into_digit_string(
@@ -162,8 +152,8 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
         )
 
         if len(sub_encodings) == 0:
-            if not encoding[-1].isdigit():
-                queue |= {encoding + ' ' + phone_number[encoding_length]}
+            if len(encoding) > 0 and not encoding[-1].isdigit():
+                queue |= {encoding + ' ' + phone_number[encoding_length - 1]}
             else:
                 # Do not add anything back to the queue. Encoding is considered
                 # invalid when phone number has to be encoded by to consequent
@@ -175,7 +165,7 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
                 for sub_encoding in sub_encodings
             }
 
-    return queue
+    return encodings
 
 
 def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
@@ -206,16 +196,24 @@ def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
 
 
 if __name__ == '__main__':
+    dictionary_path = 'test_dictionary.txt'
+    phone_numbers_path = 'test_input.txt'
     inverse_mapping = inverse_initial_mapping(MAPPING)
-    words = read_dictionary_file('')
+
+    words = []
+    for word in read_file_strip_endlines(dictionary_path):
+        words.append(word)
+
     encoding_dictionary = build_encoding_dictionary(words, inverse_mapping)
 
-    for phone_number in read_phone_numbers_file(''):
-
+    for phone_number in read_file_strip_endlines(phone_numbers_path):
         just_digits = strip_phone_number(phone_number)
         phone_number_encodings = get_phone_number_encodings(
             just_digits,
             encoding_dictionary
         )
 
-        print('\n'.join(phone_number_encodings))
+        print('\n'.join([
+            phone_number + ': ' + encoding
+            for encoding in phone_number_encodings
+        ]))
