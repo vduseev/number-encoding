@@ -34,3 +34,15 @@ ENCODED_DICTIONARY = [
 @pytest.mark.parametrize('word, expected', ENCODED_DICTIONARY)
 def test_word_encoding(word, expected, inverse_mapping):
     assert encode_word(word, inverse_mapping) == expected
+
+
+def test_build_encoding_dictionary(inverse_mapping):
+    words = [x[0] for x in ENCODED_DICTIONARY]
+    encoded_dictionary = build_encoding_dictionary(words, inverse_mapping)
+
+    for encoding_pair in ENCODED_DICTIONARY:
+        key = encoding_pair[1]
+        word = encoding_pair[0]
+
+        assert key in encoded_dictionary
+        assert word in encoded_dictionary[key]
