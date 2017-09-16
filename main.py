@@ -142,7 +142,6 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
 
     while queue:
         encoding = queue.pop()
-
         encoding_length = len(encoding.replace(' ', ''))
 
         # find fitting subencodings
@@ -177,16 +176,14 @@ def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
     fitting_encodings = set()
 
     current_end = 1  # only encodings with len >= 1 are considered
-    while current_end < len(digit_string):
+    while current_end <= len(digit_string):
         current_possible_encoding = digit_string[:current_end]
         # If encoding is found for 0..current_end digits of string
         if current_possible_encoding in encoding_dictionary:
-            fitting_encodings.add(
-                # This line takes the whole set of words, residing in encoding
-                # dictionary under the current possible encoding key, and adds
-                # them to the fitting encodings set.
-                encoding_dictionary[current_possible_encoding]
-            )
+            # This line takes the whole set of words, residing in encoding
+            # dictionary under the current possible encoding key, and adds
+            # them to the fitting encodings set.
+            fitting_encodings |= encoding_dictionary[current_possible_encoding]
 
         current_end += 1
 

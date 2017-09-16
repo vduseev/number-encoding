@@ -74,10 +74,21 @@ def test_strip_phone_number(phone_number, expected):
 
 
 @pytest.fixture(scope='module')
-def encoded_dictionary(inverse_mapping):
+def encoding_dictionary(inverse_mapping):
     words = [x[0] for x in ENCODED_DICTIONARY]
     return build_encoding_dictionary(words, inverse_mapping)
 
 
-def test_get_encodings_fitting_in_chunk(encoded_dictionary):
-    pass
+@pytest.mark.parametrize('digit_string, expected', [
+    ('562482', {'mir', 'Mix'}),
+    ('4824', {'Torf', 'fort', 'Tor'}),
+    ('04824', set())
+])
+def test_get_encodings_fitting_into_digit_string(
+        digit_string,
+        expected,
+        encoding_dictionary):
+    assert get_encodings_fitting_into_digit_string(
+        digit_string,
+        encoding_dictionary
+    ) == expected
