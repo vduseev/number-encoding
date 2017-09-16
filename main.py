@@ -165,7 +165,7 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
 
 
 def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
-    """Takes a string consisting of digits and returns a set of encodings from
+    """Takes a string consisting of digits and returns a set of words from
     encoding dictionary that fit into this string starting with the first
     character.
     
@@ -178,9 +178,15 @@ def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
 
     current_end = 1  # only encodings with len >= 1 are considered
     while current_end < len(digit_string):
-        # If encoding is found for 0..current_end digits of chunk
-        if digit_string[0:current_end] in encoding_dictionary:
-            fitting_encodings.add(digit_string[0:current_end])
+        current_possible_encoding = digit_string[:current_end]
+        # If encoding is found for 0..current_end digits of string
+        if current_possible_encoding in encoding_dictionary:
+            fitting_encodings.add(
+                # This line takes the whole set of words, residing in encoding
+                # dictionary under the current possible encoding key, and adds
+                # them to the fitting encodings set.
+                encoding_dictionary[current_possible_encoding]
+            )
 
         current_end += 1
 
