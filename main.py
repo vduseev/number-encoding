@@ -138,6 +138,17 @@ def strip_phone_number(phone_number):
 
 
 def get_phone_number_encodings(phone_number, encoding_dictionary):
+    """
+
+    TODO: almost infinite loop. We add stuff back to the queue. Probably, at
+    the end we will add just the empty sets. Queue will become empty, and we'll
+    end up without any results.
+
+    :param phone_number:
+    :param encoding_dictionary:
+    :return:
+    """
+
     queue = {''}
 
     while queue:
@@ -151,14 +162,18 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
         )
 
         if len(sub_encodings) == 0:
-            if not encoding[-1].isdigit():  # TODO: won't work because encoding is all digits
-                queue += {encoding + ' ' + phone_number[encoding_length]}
+            if not encoding[-1].isdigit():
+                queue |= {encoding + ' ' + phone_number[encoding_length]}
+            else:
+                # Do not add anything back to the queue. Encoding is considered
+                # invalid when phone number has to be encoded by to consequent
+                # digits. Hence, we drop this encoding out of final queue.
+                pass
         else:
-            encodings = {
+            queue |= {
                 encoding + ' ' + sub_encoding
                 for sub_encoding in sub_encodings
             }
-            queue += encodings
 
     return queue
 
