@@ -196,13 +196,11 @@ def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
 if __name__ == '__main__':
     inverse_mapping = inverse_initial_mapping(MAPPING)
     words = read_dictionary_file('')
-
     encoding_dictionary = build_encoding_dictionary(words, inverse_mapping)
 
     for phone_number in read_phone_numbers_file(''):
 
         just_digits = strip_phone_number(phone_number)
-
         phone_number_encodings = get_phone_number_encodings(
             just_digits,
             encoding_dictionary
