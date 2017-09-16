@@ -110,7 +110,7 @@ def encode_word(word, mapping):
     return encoding
 
 
-def read_phone_numbers(path):
+def read_phone_numbers_file(path):
     """Generator function that yields a phone numbers for each line in the file.
 
     A phone number is an arbitrary(!) string of dashes - , slashes / and digits.
@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
     encoding_dictionary = build_encoding_dictionary(words)
 
-    for phone_number in read_phone_numbers(''):
+    for phone_number in read_phone_numbers_file(''):
 
         just_digits = strip_phone_number(phone_number)
 
