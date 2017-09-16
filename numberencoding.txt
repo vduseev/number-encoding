@@ -73,29 +73,29 @@ intended degrees of freedom.)
 
 Sample dictionary:
 
-an
-blau
+an              51
+blau            7857
 Bo"             78
-Boot
+Boot            7884
 bo"s            783
 da              35
-Fee
-fern
-Fest
+Fee             400
+fern            4021
+Fest            4034
 fort            4824
 je              10
-jemand
+jemand          105513
 mir             562
 Mix             562
-Mixer
-Name
+Mixer           56202
+Name            1550
 neu             107
 o"d             83
-Ort
+Ort             824
 so              38
 Tor             482
 Torf            4824
-Wasser
+Wasser          253302
 
 Sample phone number list:
 

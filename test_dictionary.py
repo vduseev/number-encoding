@@ -16,18 +16,29 @@ def inverse_mapping():
 
 
 ENCODED_DICTIONARY = [
+    ('an', '51'),
+    ('blau', '7857'),
     ('Bo"', '78'),
+    ('Boot', '7884'),
     ('bo"s', '783'),
     ('da', '35'),
+    ('Fee', '400'),
+    ('fern', '4021'),
+    ('Fest', '4034'),
     ('fort', '4824'),
     ('je', '10'),
+    ('jemand', '105513'),
     ('mir', '562'),
     ('Mix', '562'),
+    ('Mixer', '56202'),
+    ('Name', '1550'),
     ('neu', '107'),
     ('o"d', '83'),
+    ('Ort', '824'),
     ('so', '38'),
     ('Tor', '482'),
-    ('Torf', '4824')
+    ('Torf', '4824'),
+    ('Wasser', '253302')
 ]
 
 
@@ -60,3 +71,13 @@ def test_build_encoding_dictionary(inverse_mapping):
 ])
 def test_strip_phone_number(phone_number, expected):
     assert strip_phone_number(phone_number) == expected
+
+
+@pytest.fixture(scope='module')
+def encoded_dictionary(inverse_mapping):
+    words = [x[0] for x in ENCODED_DICTIONARY]
+    return build_encoding_dictionary(words, inverse_mapping)
+
+
+def test_get_encodings_fitting_in_chunk(encoded_dictionary):
+    pass
