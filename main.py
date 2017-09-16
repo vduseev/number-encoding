@@ -57,7 +57,7 @@ def read_dictionary_file(path):
     return words
 
 
-def build_encoding_dictionary(words):
+def build_encoding_dictionary(words, mapping):
     """Build a dict with encodings as keys and list of words having such
     encoding as values.
 
@@ -75,7 +75,7 @@ def build_encoding_dictionary(words):
 
     # For each word calculate the encoded value
     for word in words:
-        word_encoding = encode_word(word)
+        word_encoding = encode_word(word, mapping)
 
         # Check if some word already produced same encoding.
         if word_encoding in encoded_dictionary:
@@ -84,13 +84,14 @@ def build_encoding_dictionary(words):
         else:
             # If no, add a new key with the current word as the first list
             # value.
-            encoded_dictionary[word_encoding] = [word]
+            encoded_dictionary[word_encoding] = {word}
 
     return encoded_dictionary
 
 
 def encode_word(word, mapping):
-    """
+    """Represent given word as a string of digits according to the mapping
+    given in the requirements.
 
     The words in the dictionary contain letters
     (capital or small, but the difference is ignored in the sorting), dashes
@@ -156,7 +157,7 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
             }
             queue += encodings
 
-    return []
+    return queue
 
 
 def get_encodings_fitting_in_chunk(chunk, encoding_dictionary):

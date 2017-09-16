@@ -92,7 +92,7 @@ Name
 neu             107
 o"d             83
 Ort
-so              10
+so              38
 Tor             482
 Torf            4824
 Wasser
