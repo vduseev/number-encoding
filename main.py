@@ -4,7 +4,6 @@
 3. Calculate a hash or something similar for each dictionary word
 """
 
-
 """The following mapping from letters to digits is given
 (see numberencoding.txt requirement - 20 Feb 2012):
 
@@ -36,6 +35,7 @@ def inverse_initial_mapping(mapping):
     :param mapping: Initial mapping as given by the requirements
     :return: inverse mapping
     """
+
     inverse_mapping = {}
     for key in mapping:
         for char in mapping[key]:
@@ -50,6 +50,7 @@ def read_dictionary_file(path):
     :param path:
     :return:
     """
+
     with open(path, mode='r') as dictionary_file:
         # Read all lines from the file
         words = dictionary_file.readlines()
@@ -101,6 +102,7 @@ def encode_word(word, mapping):
     :param mapping:
     :return: String of digits representing given word
     """
+
     # remove umlaut symbol (represented by double quotes) and dashes
     clean_word = word.replace('"', '').replace('-', '')
 
@@ -119,6 +121,7 @@ def read_phone_numbers_file(path):
     :param path:
     :return:
     """
+
     with open(path, mode='r') as phone_numbers_file:
         for line in phone_numbers_file:
             yield line
@@ -130,6 +133,7 @@ def strip_phone_number(phone_number):
     :param phone_number:
     :return: Phone number string without dashes and slashes
     """
+
     return phone_number.replace('-', '').replace('/', '')
 
 
@@ -142,7 +146,7 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
         encoding_length = len(encoding.replace(' ', ''))
 
         # find fitting subencodings
-        sub_encodings = get_encodings_fitting_in_chunk(
+        sub_encodings = get_encodings_fitting_into_digit_string(
             phone_number[encoding_length:],
             encoding_dictionary
         )
@@ -160,14 +164,23 @@ def get_phone_number_encodings(phone_number, encoding_dictionary):
     return queue
 
 
-def get_encodings_fitting_in_chunk(chunk, encoding_dictionary):
+def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
+    """Takes a string consisting of digits and returns a set of encodings from
+    encoding dictionary that fit into this string starting with the first
+    character.
+    
+    :param digit_string:
+    :param encoding_dictionary: 
+    :return: 
+    """
+
     fitting_encodings = set()
 
     current_end = 1  # only encodings with len >= 1 are considered
-    while current_end < len(chunk):
+    while current_end < len(digit_string):
         # If encoding is found for 0..current_end digits of chunk
-        if chunk[0:current_end] in encoding_dictionary:
-            fitting_encodings.add(chunk[0:current_end])
+        if digit_string[0:current_end] in encoding_dictionary:
+            fitting_encodings.add(digit_string[0:current_end])
 
         current_end += 1
 
