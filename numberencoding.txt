@@ -75,52 +75,52 @@ Sample dictionary:
 
 an
 blau
-Bo"
+Bo"             78
 Boot
-bo"s
-da
+bo"s            783
+da              35
 Fee
 fern
 Fest
-fort
-je
+fort            4824
+je              10
 jemand
-mir
-Mix
+mir             562
+Mix             562
 Mixer
 Name
-neu
-o"d
+neu             107
+o"d             83
 Ort
-so
-Tor
-Torf
+so              10
+Tor             482
+Torf            4824
 Wasser
 
 Sample phone number list:
 
-112
-5624-82
-4824
-0721/608-4067
-10/783--5
-1078-913-5
-381482
-04824
+112             112
+5624-82         562482
+4824            4824
+0721/608-4067   07216084067
+10/783--5       107835
+1078-913-5      10789135
+381482          381482
+04824           04824
 
 Corresponding correct program output (on screen):
-5624-82: mir Tor
-5624-82: Mix Tor
-4824: Torf
-4824: fort
-4824: Tor 4
-10/783--5: neu o"d 5
-10/783--5: je bo"s 5
-10/783--5: je Bo" da
-381482: so 1 Tor
-04824: 0 Torf
-04824: 0 fort
-04824: 0 Tor 4
+5624-82:        mir Tor
+5624-82:        Mix Tor
+4824:           Torf
+4824:           fort
+4824:           Tor 4
+10/783--5:      neu o"d 5
+10/783--5:      je bo"s 5
+10/783--5:      je Bo" da
+381482:         so 1 Tor
+04824:          0 Torf
+04824:          0 fort
+04824:          0 Tor 4
 
 Any other output would be wrong (except for different ordering of the
 lines).
