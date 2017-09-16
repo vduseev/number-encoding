@@ -46,3 +46,17 @@ def test_build_encoding_dictionary(inverse_mapping):
 
         assert key in encoded_dictionary
         assert word in encoded_dictionary[key]
+
+
+@pytest.mark.parametrize('phone_number, expected', [
+    ('112', '112'),
+    ('5624-82', '562482'),
+    ('4824', '4824'),
+    ('0721/608-4067', '07216084067'),
+    ('10/783--5', '107835'),
+    ('1078-913-5', '10789135'),
+    ('381482', '381482'),
+    ('04824', '04824')
+])
+def test_strip_phone_number(phone_number, expected):
+    assert strip_phone_number(phone_number) == expected
