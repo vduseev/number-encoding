@@ -44,7 +44,7 @@ def inverse_initial_mapping(mapping):
     return inverse_mapping
 
 
-def read_file_strip_endlines(path):
+def file_lines_generator(path):
     """Generator function that yields lines without \n and \r at the end.
 
     :param path:
@@ -54,8 +54,6 @@ def read_file_strip_endlines(path):
     with open(path, mode='r') as dictionary_file:
         for line in dictionary_file:
             yield line.rstrip('\n').rstrip('\r')
-
-    return words
 
 
 def build_encoding_dictionary(words, mapping):
@@ -195,25 +193,51 @@ def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
     return fitting_encodings
 
 
-if __name__ == '__main__':
-    dictionary_path = 'test_dictionary.txt'
-    phone_numbers_path = 'test_input.txt'
-    inverse_mapping = inverse_initial_mapping(MAPPING)
+def encode_phone_numbers(
+        phone_numbers_generator,
+        encoding_dictionary,
+        encoded_phone_action):
 
-    words = []
-    for word in read_file_strip_endlines(dictionary_path):
-        words.append(word)
+    for phone_number in phone_numbers_generator:
 
-    encoding_dictionary = build_encoding_dictionary(words, inverse_mapping)
-
-    for phone_number in read_file_strip_endlines(phone_numbers_path):
-        just_digits = strip_phone_number(phone_number)
+        # Only digits
+        clean_phone_number = strip_phone_number(phone_number)
         phone_number_encodings = get_phone_number_encodings(
-            just_digits,
+            clean_phone_number,
             encoding_dictionary
         )
 
-        print('\n'.join([
-            phone_number + ': ' + encoding
-            for encoding in phone_number_encodings
-        ]))
+        encoded_phone_action(phone_number, phone_number_encodings)
+
+
+def read_dictionary(path):
+
+    words = []
+    for word in file_lines_generator(path):
+
+        words.append(word)
+
+    return words
+
+
+def print_phone_number_encodings(phone_number, encodings):
+
+    print('\n'.join([
+        phone_number + ': ' + encoding
+        for encoding in encodings
+    ]))
+
+
+if __name__ == '__main__':
+    dictionary_path = 'test_dictionary.txt'
+    phone_numbers_path = 'test_input.txt'
+
+    words = read_dictionary(dictionary_path)
+    inverse_mapping = inverse_initial_mapping(MAPPING)
+    encoding_dictionary = build_encoding_dictionary(words, inverse_mapping)
+
+    encode_phone_numbers(
+        phone_numbers_generator=file_lines_generator(phone_numbers_path),
+        encoding_dictionary=encoding_dictionary,
+        encoded_phone_action=print_phone_number_encodings
+    )
