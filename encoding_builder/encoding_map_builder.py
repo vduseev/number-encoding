@@ -1,32 +1,8 @@
-"""The following mapping from letters to digits is given
-(see numberencoding.txt requirement - 20 Feb 2012):
-
-E | J N Q | R W X | D S Y | F T | A M | C I V | B K U | L O P | G H Z
-e | j n q | r w x | d s y | f t | a m | c i v | b k u | l o p | g h z
-0 |   1   |   2   |   3   |  4  |  5  |   6   |   7   |   8   |   9
-
-This mapping is used to build the inverse mapping where by referencing
-a character a digit is returned.
-"""
-_GIVEN_MAPPING = {
-    '0': {'e', 'E'},
-    '1': {'J', 'N', 'Q', 'j', 'n', 'q'},
-    '2': {'R', 'W', 'X', 'r', 'w', 'x'},
-    '3': {'D', 'S', 'Y', 'd', 's', 'y'},
-    '4': {'F', 'T', 'f', 't'},
-    '5': {'A', 'M', 'a', 'm'},
-    '6': {'C', 'I', 'V', 'c', 'i', 'v'},
-    '7': {'B', 'K', 'U', 'b', 'k', 'u'},
-    '8': {'L', 'O', 'P', 'l', 'o', 'p'},
-    '9': {'G', 'H', 'Z', 'g', 'h', 'z'}
-}
-
-
-def build_encoding(path):
+def build_encoding(path, given_mapping, ignored_chars):
 
     # Standard mapping from requirements is given in an inconvenient format
-    # for processing. It is inverted so that letter becomes the key.
-    char_to_digit_mapping = _invert_given_mapping(_GIVEN_MAPPING)
+    # for processing. It is inverted so that letter becomes the key.)
+    char_to_digit_mapping = _invert_given_mapping(given_mapping)
 
     # Read the whole words encoding_builder into the memory and build
     # encoding mapping out of it. This mapping will be used to encode
@@ -34,12 +10,16 @@ def build_encoding(path):
     dictionary_words = []
     with open(path, mode='r') as dictionary_file:
         for line in dictionary_file:
-            word = remove_characters(line, ['\n', '\r', '"', '-'])
+            word = line.rstrip('\r').rstrip('\n')
+            word = remove_characters(word, ignored_chars)
             dictionary_words.append(word)
 
+    # Each word is mapped to a digit string.
+    # Certain chars are ignored during mapping
     encoding_mapping = _map_words_to_numbers(
         words=dictionary_words,
-        char_to_digit_mapping=char_to_digit_mapping
+        char_to_digit_mapping=char_to_digit_mapping,
+        ignored_chars=ignored_chars
     )
 
     return encoding_mapping
@@ -68,7 +48,7 @@ def _invert_given_mapping(given_mapping):
     return inverse_mapping
 
 
-def _map_words_to_numbers(words, char_to_digit_mapping):
+def _map_words_to_numbers(words, char_to_digit_mapping, ignored_chars):
     """Build a dict with encodings as keys and list of words having such
     encoding as values.
 
@@ -87,8 +67,9 @@ def _map_words_to_numbers(words, char_to_digit_mapping):
     # For each word calculate the encoded value
     for word in words:
         word_encoding = _encode_word_with_char_to_digit_mapping(
-            word,
-            char_to_digit_mapping
+            word=word,
+            mapping=char_to_digit_mapping,
+            ignored_chars=ignored_chars
         )
 
         # Check if some word already produced same encoding.
@@ -103,7 +84,7 @@ def _map_words_to_numbers(words, char_to_digit_mapping):
     return mapping
 
 
-def _encode_word_with_char_to_digit_mapping(word, mapping):
+def _encode_word_with_char_to_digit_mapping(word, mapping, ignored_chars):
     """Represent given word as a string of digits according to the mapping
     given in the requirements.
 
@@ -117,7 +98,7 @@ def _encode_word_with_char_to_digit_mapping(word, mapping):
     """
 
     # remove umlaut symbol (represented by double quotes) and dashes
-    clean_word = remove_characters(word, ['"', '-'])
+    clean_word = remove_characters(word, ignored_chars)
 
     encoding = ''
     for char in clean_word:

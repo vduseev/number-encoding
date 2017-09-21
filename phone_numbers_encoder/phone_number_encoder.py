@@ -1,15 +1,9 @@
 from encoding_builder import remove_characters
 
-"""Basic design ideas:
-1. Define the mapping
-2. Read the whole encoding_builder of words
-3. Calculate a hash or something similar for each encoding_builder word
-"""
 
-
-def phone_numbers_file_encoder(input_path, encoding):
+def encode_phone_numbers_file(input_path, encoding, ignored_chars):
     """Finds, for a given phone number, all possible encodings by words,
-    and prints them.
+    and yields original number with each encoding as a tuple
 
     :param input_path: path to txt file with phone numbers
     :param encoding: encoding dictionary used to encode phone numbers
@@ -18,21 +12,30 @@ def phone_numbers_file_encoder(input_path, encoding):
 
     with open(input_path, mode='r') as dictionary_file:
         for line in dictionary_file:
-            number = line.rstrip('\n').rstrip('\r')
+            number = line.rstrip('\r').rstrip('\n')
 
             # Only digits
-            only_digits_number = remove_characters(number, ['/', '-'])
+            only_digits_number = remove_characters(number, ignored_chars)
 
             # Find possible encodings by words using built encoding
-            for encoded_number in _phone_number_encodings_generator(
+            for encoded_number in _encode_phone_number(
                     phone_number=only_digits_number,
-                    encoding=encoding):
+                    encoding=encoding,
+                    ignored_chars=ignored_chars):
 
                 yield number, encoded_number
 
 
-def _phone_number_encodings_generator(phone_number, encoding):
-    """
+def _encode_phone_number(phone_number, encoding, ignored_chars):
+    """Yield each possible encoding for a phone number
+
+    Encodings of phone numbers can consist of a single word or of multiple
+    words separated by spaces. The encodings are built word by word from
+    left to right. If and only if at a particular point no word at all from
+    the dictionary can be inserted, a single digit from the phone number can
+    be copied to the encoding instead. Two subsequent digits are never
+    allowed.
+    (as per numberencoding.txt requirements)
 
     :param phone_number:
     :param encoding:
@@ -48,13 +51,13 @@ def _phone_number_encodings_generator(phone_number, encoding):
         partial_encoding = queue.pop()
 
         # Partial encoding consists of several words separated by
-        # space character.
-        # Phone number parameter is given in digits only, without
-        # any separators.
-        # Hence, spaces are removed to correctly compare the lengths
-        # of phone number and partial encoding.
+        # space character. However, phone number parameter is given in
+        # digits only, without any separators.
+        # Hence, spaces between words and other ignored character are
+        # removed to correctly compare the lengths of phone number and
+        # partial encoding.
         clean_partial_encoding = remove_characters(
-            partial_encoding, [' ', '"', '-']
+            partial_encoding, ignored_chars + [' ']
         )
         partial_encoding_length = len(clean_partial_encoding)
 
