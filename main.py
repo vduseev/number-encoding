@@ -1,243 +1,173 @@
+from dictionary import build_encoding
 """Basic design ideas:
 1. Define the mapping
 2. Read the whole dictionary of words
 3. Calculate a hash or something similar for each dictionary word
 """
 
-"""The following mapping from letters to digits is given
-(see numberencoding.txt requirement - 20 Feb 2012):
 
-E | J N Q | R W X | D S Y | F T | A M | C I V | B K U | L O P | G H Z
-e | j n q | r w x | d s y | f t | a m | c i v | b k u | l o p | g h z
-0 |   1   |   2   |   3   |  4  |  5  |   6   |   7   |   8   |   9
+def print_encodings_for_phone_numbers(input_path, dictionary_path):
+    """Finds, for a given phone number, all possible encodings by words,
+    and prints them.
 
-This mapping is used to build the inverse mapping where by referencing
-a character a digit is returned.
-"""
-MAPPING = {
-    '0': {'e', 'E'},
-    '1': {'J', 'N', 'Q', 'j', 'n', 'q'},
-    '2': {'R', 'W', 'X', 'r', 'w', 'x'},
-    '3': {'D', 'S', 'Y', 'd', 's', 'y'},
-    '4': {'F', 'T', 'f', 't'},
-    '5': {'A', 'M', 'a', 'm'},
-    '6': {'C', 'I', 'V', 'c', 'i', 'v'},
-    '7': {'B', 'K', 'U', 'b', 'k', 'u'},
-    '8': {'L', 'O', 'P', 'l', 'o', 'p'},
-    '9': {'G', 'H', 'Z', 'g', 'h', 'z'}
-}
-
-
-def inverse_initial_mapping(mapping):
-    """Build an inverse mapping where character is the key and corresponding
-    digit is the value.
-
-    :param mapping: Initial mapping as given by the requirements
-    :return: inverse mapping
-    """
-
-    inverse_mapping = {}
-    for key in mapping:
-        for char in mapping[key]:
-            inverse_mapping[char] = key
-
-    return inverse_mapping
-
-
-def file_lines_generator(path):
-    """Generator function that yields lines without \n and \r at the end.
-
-    :param path:
+    :param input_path: path to txt file with phone numbers
+    :param dictionary_path: path to txt file with dictionary
     :return:
     """
 
-    with open(path, mode='r') as dictionary_file:
+    encoding = build_encoding(dictionary_path)
+
+    with open(input_path, mode='r') as dictionary_file:
         for line in dictionary_file:
-            yield line.rstrip('\n').rstrip('\r')
+            number =  line.rstrip('\n').rstrip('\r')
+
+            # Only digits
+            only_digits_number = number.replace('-', '').replace('/', '')
+
+            # Find possible encodings by words using built encoding dictionary
+            possible_encodings = get_phone_number_encodings(
+                only_digits_number, encoding
+            )
+
+            for encoded_number in possible_encodings:
+                print(number + ':' + encoded_number)
 
 
-def build_encoding_dictionary(words, mapping):
-    """Build a dict with encodings as keys and list of words having such
-    encoding as values.
-
-    Key     - is a string of digits encoded according to mapping dict.
-    Value   - is a list [] of all words from dictionary file that are encoded
-              by such string.
-
-    :param words: list of all words from dictionary file
-    :return: encoding dictionary
+def get_phone_number_encodings(phone_number, encoding):
     """
-
-    # Encoded dictionary with encoding as a key and a list of associated
-    # words as a value.
-    encoded_dictionary = {}
-
-    # For each word calculate the encoded value
-    for word in words:
-        word_encoding = encode_word(word, mapping)
-
-        # Check if some word already produced same encoding.
-        if word_encoding in encoded_dictionary:
-            # If yes, add the current word as an additional encoding option.
-            encoded_dictionary[word_encoding].add(word)
-        else:
-            # If no, add a new key with the current word as the first list
-            # value.
-            encoded_dictionary[word_encoding] = {word}
-
-    return encoded_dictionary
-
-
-def encode_word(word, mapping):
-    """Represent given word as a string of digits according to the mapping
-    given in the requirements.
-
-    The words in the dictionary contain letters
-    (capital or small, but the difference is ignored in the sorting), dashes
-    - and double quotes " . For the encoding only the letters are used.
-
-    :param word:
-    :param mapping:
-    :return: String of digits representing given word
-    """
-
-    # remove umlaut symbol (represented by double quotes) and dashes
-    clean_word = word.replace('"', '').replace('-', '')
-
-    encoding = ''
-    for char in clean_word:
-        encoding += mapping[char]
-
-    return encoding
-
-
-def strip_phone_number(phone_number):
-    """ Strips phone number of the dashes and slashes.
 
     :param phone_number:
-    :return: Phone number string without dashes and slashes
-    """
-
-    return phone_number.replace('-', '').replace('/', '')
-
-
-def get_phone_number_encodings(phone_number, encoding_dictionary):
-    """
-
-    TODO: It's almost infinite loop. We add stuff back to the queue. Probably, at
-    the end we will add just the empty sets. Queue will become empty, and we'll
-    end up without any results.
-
-    :param phone_number:
-    :param encoding_dictionary:
+    :param encoding:
     :return:
     """
 
-    encodings = set()
+    encoded_numbers = set()  # Result set to be returned
+
+    # Queue of partial encodings; Initial value is fake and will not produce
+    # any results.
     queue = {''}
 
     while queue:
-        encoding = queue.pop()
-        encoding_length = len(encoding.replace(' ', ''))
+        # Each iteration some partial encoding is considered
+        partial_encoding = queue.pop()
 
-        if encoding_length == len(phone_number):
-            encodings.add(encoding)
+        # Partial encoding consists of several words separated by
+        # space character.
+        # Phone number parameter is given in digits only, without
+        # any separators.
+        # Hence, spaces are removed to correctly compare the lengths
+        # of phone number and partial encoding.
+        clean_partial_encoding = partial_encoding\
+            .replace(' ', '').replace('-', '').replace('"', '')
+        partial_encoding_length = len(clean_partial_encoding)
 
-        # find fitting subencodings
-        sub_encodings = get_encodings_fitting_into_digit_string(
-            phone_number[encoding_length:],
-            encoding_dictionary
+        # If partial encoding reached the length of the phone number,
+        # then there are no more digits to be encoded.
+        # Encoding is added to final result set. And it is not put back
+        # in the queue.
+        if partial_encoding_length == len(phone_number):
+            encoded_numbers.add(partial_encoding)
+            continue
+
+        # Check what words fit into the part of the phone number
+        # that is not encoded yet
+        fitting_words = get_words_fitting_into_digit_string(
+            phone_number[partial_encoding_length:],
+            encoding
         )
 
-        if len(sub_encodings) == 0:
-            if len(encoding) > 0 and not encoding[-1].isdigit():
-                queue |= {encoding + ' ' + phone_number[encoding_length - 1]}
-            else:
-                # Do not add anything back to the queue. Encoding is considered
-                # invalid when phone number has to be encoded by to consequent
-                # digits. Hence, we drop this encoding out of final queue.
-                pass
-        else:
+        # If some words fit into that part, then build a new set of
+        # partial encodings out of them, combining initial partial
+        # encoding with fitting words.
+        # Then add them back to the queue for further processing.
+        if len(fitting_words) > 0:
             queue |= {
-                encoding + ' ' + sub_encoding
-                for sub_encoding in sub_encodings
+                partial_encoding + ' ' + sub_encoding
+                for sub_encoding in fitting_words
+            }
+            continue
+
+        # When no fitting words are found then encode one symbol of
+        # phone number with itself, but only if no fitting words are
+        # found and last character of encoding is not a digit already.
+        if not is_last_char_digit(partial_encoding):
+            queue |= {
+                partial_encoding + ' '
+                + phone_number[partial_encoding_length]
             }
 
-    return encodings
+        # Do not add anything back to the queue. Encoding is considered
+        # invalid when nothing above worked.
+        # Hence, drop this partial encoding out of final queue.
+        pass
+
+    return encoded_numbers
 
 
-def get_encodings_fitting_into_digit_string(digit_string, encoding_dictionary):
+def get_words_fitting_into_digit_string(digit_string, encoding):
     """Takes a string consisting of digits and returns a set of words from
-    encoding dictionary that fit into this string starting with the first
-    character.
+    encoding that fit into this string starting with the first character.
+
+    == Example ==
+
+    Let digit_string = 48245;
+    Let encoding = {'4824': {'Torf', 'fort'}, '482': {'Tor'}, '5': {'a'}}
+
+    Then following examples will be correct:
+    * 48245 Torf
+    * 48245 fort
+    * 48245 Tor
+
+    Torf, fort and Tor all fit into 42845 string.
+
+    == Algorithm logic ==
+
+    1. 4....
+       no encoding
+    2. 48...
+       no encoding
+    3. 482..
+       'Tor' is found in encoding; add it to results
+    4. 4824.
+       'Torf' and 'fort' are found; add to results
+    5. 48245
+       no encoding; '5' does not count; algorithm only look for the whole
+       48245 string in encoding dictionary
     
     :param digit_string:
-    :param encoding_dictionary: 
+    :param encoding:
     :return: 
     """
 
-    fitting_encodings = set()
+    fitting_words = set()
 
-    current_end = 1  # only encodings with len >= 1 are considered
-    while current_end <= len(digit_string):
-        current_possible_encoding = digit_string[:current_end]
+    pos = 1  # only encodings with len >= 1 are considered
+    while pos <= len(digit_string):
+        current_possible_encoding = digit_string[:pos]
         # If encoding is found for 0..current_end digits of string
-        if current_possible_encoding in encoding_dictionary:
+        if current_possible_encoding in encoding:
             # This line takes the whole set of words, residing in encoding
             # dictionary under the current possible encoding key, and adds
             # them to the fitting encodings set.
-            fitting_encodings |= encoding_dictionary[current_possible_encoding]
+            fitting_words |= encoding[current_possible_encoding]
 
-        current_end += 1
+        pos += 1
 
-    return fitting_encodings
-
-
-def encode_phone_numbers(
-        phone_numbers_generator,
-        encoding_dictionary,
-        encoded_phone_action):
-
-    for phone_number in phone_numbers_generator:
-
-        # Only digits
-        clean_phone_number = strip_phone_number(phone_number)
-        phone_number_encodings = get_phone_number_encodings(
-            clean_phone_number,
-            encoding_dictionary
-        )
-
-        encoded_phone_action(phone_number, phone_number_encodings)
+    return fitting_words
 
 
-def read_dictionary(path):
-
-    words = []
-    for word in file_lines_generator(path):
-
-        words.append(word)
-
-    return words
-
-
-def print_phone_number_encodings(phone_number, encodings):
-
-    print('\n'.join([
-        phone_number + ': ' + encoding
-        for encoding in encodings
-    ]))
+def is_last_char_digit(string):
+    if len(string) > 0:
+        if string[-1].isdigit():
+            return True
+    return False
 
 
 if __name__ == '__main__':
     dictionary_path = 'test_dictionary.txt'
     phone_numbers_path = 'test_input.txt'
 
-    words = read_dictionary(dictionary_path)
-    inverse_mapping = inverse_initial_mapping(MAPPING)
-    encoding_dictionary = build_encoding_dictionary(words, inverse_mapping)
-
-    encode_phone_numbers(
-        phone_numbers_generator=file_lines_generator(phone_numbers_path),
-        encoding_dictionary=encoding_dictionary,
-        encoded_phone_action=print_phone_number_encodings
+    print_encodings_for_phone_numbers(
+        input_path=phone_numbers_path,
+        dictionary_path=dictionary_path
     )
