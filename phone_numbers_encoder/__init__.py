@@ -1,0 +1,1 @@
+from phone_numbers_encoder.encoder import print_encodings_for_phone_numbers
