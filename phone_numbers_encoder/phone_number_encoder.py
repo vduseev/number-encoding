@@ -1,4 +1,4 @@
-from encoding_builder import build_encoding, remove_characters
+from encoding_builder import remove_characters
 
 """Basic design ideas:
 1. Define the mapping
@@ -7,32 +7,28 @@ from encoding_builder import build_encoding, remove_characters
 """
 
 
-def print_encodings_for_phone_numbers(input_path, dictionary_path):
+def phone_numbers_file_encoder(input_path, encoding):
     """Finds, for a given phone number, all possible encodings by words,
     and prints them.
 
     :param input_path: path to txt file with phone numbers
-    :param dictionary_path: path to txt file with encoding_builder
+    :param encoding: encoding dictionary used to encode phone numbers
     :return:
     """
-
-    encoding = build_encoding(dictionary_path)
 
     with open(input_path, mode='r') as dictionary_file:
         for line in dictionary_file:
             number = line.rstrip('\n').rstrip('\r')
 
             # Only digits
-            only_digits_number = number.replace('-', '').replace('/', '')
+            only_digits_number = remove_characters(number, ['/', '-'])
 
-            # Find possible encodings by words using built encoding encoding_builder
+            # Find possible encodings by words using built encoding
             for encoded_number in _phone_number_encodings_generator(
-                    only_digits_number, encoding
-            ):
-                print(number + ': ' + encoded_number)
+                    phone_number=only_digits_number,
+                    encoding=encoding):
 
-                # for encoded_number in possible_encodings:
-                #     print(number + ':' + encoded_number)
+                yield number, encoded_number
 
 
 def _phone_number_encodings_generator(phone_number, encoding):
@@ -74,8 +70,8 @@ def _phone_number_encodings_generator(phone_number, encoding):
         # Check what words fit into the part of the phone number
         # that is not encoded yet
         fitting_words = _get_words_fitting_into_digit_string(
-            phone_number[partial_encoding_length:],
-            encoding
+            digit_string=phone_number[partial_encoding_length:],
+            encoding=encoding
         )
 
         # If some words fit into that part, then build a new set of
@@ -83,34 +79,31 @@ def _phone_number_encodings_generator(phone_number, encoding):
         # encoding with fitting words.
         # Then add them back to the queue for further processing.
         if len(fitting_words) > 0:
-            queue |= {
+            combos_with_fitting_words = {
                 partial_encoding
                 + (' ' if len(partial_encoding) > 0 else '')
                 + word for word in fitting_words
             }
+            queue |= combos_with_fitting_words
             continue
 
         # When no fitting words are found then encode one symbol of
         # phone number with itself, but only if no fitting words are
         # found and last character of encoding is not a digit already.
         if not _is_last_char_digit(partial_encoding):
-            queue |= {
+            partial_encoding_plus_digit = {
                 partial_encoding
                 + (' ' if len(partial_encoding) > 0 else '')
                 + phone_number[partial_encoding_length]
             }
-
-        # Do not add anything back to the queue. Encoding is considered
-        # invalid when nothing above worked.
-        # Hence, drop this partial encoding out of final queue.
-        pass
+            queue |= partial_encoding_plus_digit
 
 
 def _get_words_fitting_into_digit_string(digit_string, encoding):
     """Takes a string consisting of digits and returns a set of words from
     encoding that fit into this string starting with the first character.
 
-    == Example ==
+    ## Example
 
     Let digit_string = 48245;
     Let encoding = {'4824': {'Torf', 'fort'}, '482': {'Tor'}, '5': {'a'}}
@@ -122,16 +115,20 @@ def _get_words_fitting_into_digit_string(digit_string, encoding):
 
     Torf, fort and Tor all fit into 42845 string.
 
-    == Algorithm logic ==
+    ## Algorithm logic
 
     1. 4....
        no encoding
+
     2. 48...
        no encoding
+
     3. 482..
        'Tor' is found in encoding; add it to results
+
     4. 4824.
        'Torf' and 'fort' are found; add to results
+
     5. 48245
        no encoding; '5' does not count; algorithm only look for the whole
        48245 string in encoding encoding_builder
@@ -149,8 +146,8 @@ def _get_words_fitting_into_digit_string(digit_string, encoding):
         # If encoding is found for 0..current_end digits of string
         if current_possible_encoding in encoding:
             # This line takes the whole set of words, residing in encoding
-            # encoding_builder under the current possible encoding key, and adds
-            # them to the fitting encodings set.
+            # encoding_builder under the current possible encoding key,
+            # and adds them to the fitting encodings set
             fitting_words |= encoding[current_possible_encoding]
 
         pos += 1

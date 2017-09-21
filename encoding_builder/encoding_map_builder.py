@@ -28,12 +28,13 @@ def build_encoding(path):
     # for processing. It is inverted so that letter becomes the key.
     char_to_digit_mapping = _invert_given_mapping(_GIVEN_MAPPING)
 
-    # Read the whole words encoding_builder into memory and build encoding mapping
-    # out of it. This mapping will be used to encode phone numbers.
+    # Read the whole words encoding_builder into the memory and build
+    # encoding mapping out of it. This mapping will be used to encode
+    # phone numbers.
     dictionary_words = []
     with open(path, mode='r') as dictionary_file:
         for line in dictionary_file:
-            word =  line.rstrip('\n').rstrip('\r')
+            word = remove_characters(line, ['\n', '\r', '"', '-'])
             dictionary_words.append(word)
 
     encoding_mapping = _map_words_to_numbers(
@@ -47,7 +48,7 @@ def build_encoding(path):
 def remove_characters(string, chars):
     result = string
     for char in chars:
-        result = string.replace(char, '')
+        result = result.replace(char, '')
     return result
 
 
@@ -72,8 +73,8 @@ def _map_words_to_numbers(words, char_to_digit_mapping):
     encoding as values.
 
     Key     - is a string of digits encoded according to mapping dict.
-    Value   - is a list [] of all words from encoding_builder file that are encoded
-              by such string.
+    Value   - is a list [] of all words from encoding_builder file that
+              are encoded by such string.
 
     :param words: list of all words from encoding_builder file
     :return: encoding encoding_builder

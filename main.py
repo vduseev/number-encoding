@@ -1,11 +1,18 @@
-from phone_numbers_encoder import print_encodings_for_phone_numbers
+from phone_numbers_encoder import phone_numbers_file_encoder
+from encoding_builder import build_encoding
 
 
 if __name__ == '__main__':
-    dictionary_path = 'test_dictionary.txt'
-    phone_numbers_path = 'test_input.txt'
+    dictionary_path = 'dictionary.txt'
+    phone_numbers_path = 'input.txt'
 
-    print_encodings_for_phone_numbers(
-        input_path=phone_numbers_path,
-        dictionary_path=dictionary_path
-    )
+    encoding = build_encoding(dictionary_path)
+
+    for number_and_encoding in phone_numbers_file_encoder(
+            input_path=phone_numbers_path,
+            encoding=encoding):
+
+        original_number = number_and_encoding[0]
+        encoded_number = number_and_encoding[1]
+
+        print(original_number + ': ' + encoded_number)
