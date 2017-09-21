@@ -4,7 +4,7 @@ def build_encoding(path, given_mapping, ignored_chars):
     # for processing. It is inverted so that letter becomes the key.)
     char_to_digit_mapping = _invert_given_mapping(given_mapping)
 
-    # Read the whole words encoding_builder into the memory and build
+    # Read the whole words encoding_scheme_builder into the memory and build
     # encoding mapping out of it. This mapping will be used to encode
     # phone numbers.
     dictionary_words = []
@@ -53,14 +53,14 @@ def _map_words_to_numbers(words, char_to_digit_mapping, ignored_chars):
     encoding as values.
 
     Key     - is a string of digits encoded according to mapping dict.
-    Value   - is a list [] of all words from encoding_builder file that
+    Value   - is a list [] of all words from encoding_scheme_builder file that
               are encoded by such string.
 
-    :param words: list of all words from encoding_builder file
-    :return: encoding encoding_builder
+    :param words: list of all words from encoding_scheme_builder file
+    :return: encoding encoding_scheme_builder
     """
 
-    # Encoded encoding_builder with encoding as a key and a list of associated
+    # Encoded encoding_scheme_builder with encoding as a key and a list of associated
     # words as a value.
     mapping = {}
 
@@ -88,7 +88,7 @@ def _encode_word_with_char_to_digit_mapping(word, mapping, ignored_chars):
     """Represent given word as a string of digits according to the mapping
     given in the requirements.
 
-    The words in the encoding_builder contain letters
+    The words in the encoding_scheme_builder contain letters
     (capital or small, but the difference is ignored in the sorting), dashes
     - and double quotes " . For the encoding only the letters are used.
 

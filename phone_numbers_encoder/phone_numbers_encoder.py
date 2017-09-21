@@ -1,4 +1,4 @@
-from encoding_builder import remove_characters
+from encoding_scheme_builder import remove_characters
 
 
 def encode_phone_numbers_file(input_path, encoding, ignored_chars):
@@ -7,6 +7,7 @@ def encode_phone_numbers_file(input_path, encoding, ignored_chars):
 
     :param input_path: path to txt file with phone numbers
     :param encoding: encoding dictionary used to encode phone numbers
+    :param ignored_chars: list of chars to be ignored when encoding the number
     :return:
     """
 
@@ -134,7 +135,7 @@ def _get_words_fitting_into_digit_string(digit_string, encoding):
 
     5. 48245
        no encoding; '5' does not count; algorithm only look for the whole
-       48245 string in encoding encoding_builder
+       48245 string in encoding encoding_scheme_builder
 
     :param digit_string:
     :param encoding:
@@ -149,7 +150,7 @@ def _get_words_fitting_into_digit_string(digit_string, encoding):
         # If encoding is found for 0..current_end digits of string
         if current_possible_encoding in encoding:
             # This line takes the whole set of words, residing in encoding
-            # encoding_builder under the current possible encoding key,
+            # encoding_scheme_builder under the current possible encoding key,
             # and adds them to the fitting encodings set
             fitting_words |= encoding[current_possible_encoding]
 

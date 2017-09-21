@@ -1,1 +1,1 @@
-from phone_numbers_encoder.phone_number_encoder import encode_phone_numbers_file
+from phone_numbers_encoder.phone_numbers_encoder import encode_phone_numbers_file

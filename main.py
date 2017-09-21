@@ -1,6 +1,6 @@
 import configparser
 from phone_numbers_encoder import encode_phone_numbers_file
-from encoding_builder import build_encoding
+from encoding_scheme_builder import build_encoding
 
 
 if __name__ == '__main__':
