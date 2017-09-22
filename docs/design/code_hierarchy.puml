@@ -1,0 +1,63 @@
+@startuml
+
+class main as "encode.py" << (S,orchid) Main Script >> {
+  +{method} if __name__ == '__main__'
+  .. module scope methods ..
+  -parse_arguments()
+  -parse_config()
+}
+
+note top of main
+  **Main** starting script.
+  - Reads arguments, if provided.
+  - Calls **encode_and_print_phone_numbers()**.
+end note
+
+class config as "encoder_config.ini" << (C, #FFFF00) Config >> {
+  +{field} [MAPPING]
+  +{field} [IGNORED_CHARACTERS]
+}
+
+package "phone_numbers_encoder" {
+  class phone_numbers_encoder << (M, #FF7700) Module >> {
+    +encode_and_print_phone_numbers()
+    .. module scope methods ..
+    -encode_phone_numbers_file()
+    -encode_digit_string()
+    -get_words_fitting_into_digit_string()
+    -is_last_char_digit()
+  }
+
+  class conftest as "conftest.py" << (T, #00FFFF) Fixtures >>
+
+  class test_phone_numbers_encoder as "test_phone_numbers_encoder.py" << (T, #00FFFF) Tests >>
+
+  package "encoding_scheme_builder" {
+      class encoding_scheme_builder << (M, #FF7700) Module >> {
+        +build_encoding_from_file()
+        +remove_characters()
+        .. module scope methods ..
+        -invert_mapping()
+        -map_words_to_numbers()
+        -encode_word_using_mapping()
+      }
+
+      class test_encoding_scheme_builder as "test_encoding_scheme_builder.py" << (T, #00FFFF) Tests >>
+  }
+}
+
+main -right-> config : reads
+main -down-> phone_numbers_encoder
+test_encoding_scheme_builder -up-> conftest : relies on >
+test_phone_numbers_encoder -down-> conftest : relies on >
+phone_numbers_encoder -down-> encoding_scheme_builder
+encoding_scheme_builder -right-> test_encoding_scheme_builder
+phone_numbers_encoder -right-> test_phone_numbers_encoder
+
+hide members
+show config fields
+show main methods
+show phone_numbers_encoder methods
+show encoding_scheme_builder methods
+
+@enduml
