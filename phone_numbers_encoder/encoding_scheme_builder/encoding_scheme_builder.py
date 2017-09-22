@@ -1,8 +1,8 @@
-def build_encoding(path, given_mapping, ignored_chars):
+def build_encoding_from_file(path, given_mapping, ignored_dict_chars):
 
     # Standard mapping from requirements is given in an inconvenient format
     # for processing. It is inverted so that letter becomes the key.)
-    char_to_digit_mapping = _invert_given_mapping(given_mapping)
+    char_to_digit_mapping = invert_mapping(given_mapping)
 
     # Read the whole words encoding_scheme_builder into the memory and build
     # encoding mapping out of it. This mapping will be used to encode
@@ -11,15 +11,14 @@ def build_encoding(path, given_mapping, ignored_chars):
     with open(path, mode='r') as dictionary_file:
         for line in dictionary_file:
             word = line.rstrip('\r').rstrip('\n')
-            word = remove_characters(word, ignored_chars)
             dictionary_words.append(word)
 
     # Each word is mapped to a digit string.
     # Certain chars are ignored during mapping
-    encoding_mapping = _map_words_to_numbers(
+    encoding_mapping = map_words_to_numbers(
         words=dictionary_words,
         char_to_digit_mapping=char_to_digit_mapping,
-        ignored_chars=ignored_chars
+        ignored_chars=ignored_dict_chars
     )
 
     return encoding_mapping
@@ -32,7 +31,7 @@ def remove_characters(string, chars):
     return result
 
 
-def _invert_given_mapping(given_mapping):
+def invert_mapping(given_mapping):
     """Build an inverse mapping where character is the key and corresponding
     digit is the value.
 
@@ -40,24 +39,24 @@ def _invert_given_mapping(given_mapping):
     :return: inverse mapping
     """
 
-    inverse_mapping = {}
+    inverted_mapping = {}
     for key in given_mapping:
         for char in given_mapping[key]:
-            inverse_mapping[char] = key
+            inverted_mapping[char] = key
 
-    return inverse_mapping
+    return inverted_mapping
 
 
-def _map_words_to_numbers(words, char_to_digit_mapping, ignored_chars):
+def map_words_to_numbers(words, char_to_digit_mapping, ignored_chars):
     """Build a dict with encodings as keys and list of words having such
     encoding as values.
 
     Key     - is a string of digits encoded according to mapping dict.
-    Value   - is a list [] of all words from encoding_scheme_builder file that
+    Value   - is a set of all words from encoding_scheme_builder file that
               are encoded by such string.
 
     :param words: list of all words from encoding_scheme_builder file
-    :return: encoding encoding_scheme_builder
+    :return: dict of numbers with sets of words encoded by them as values
     """
 
     # Encoded encoding_scheme_builder with encoding as a key and a list of associated
@@ -66,7 +65,7 @@ def _map_words_to_numbers(words, char_to_digit_mapping, ignored_chars):
 
     # For each word calculate the encoded value
     for word in words:
-        word_encoding = _encode_word_with_char_to_digit_mapping(
+        word_encoding = encode_word_using_mapping(
             word=word,
             mapping=char_to_digit_mapping,
             ignored_chars=ignored_chars
@@ -84,7 +83,7 @@ def _map_words_to_numbers(words, char_to_digit_mapping, ignored_chars):
     return mapping
 
 
-def _encode_word_with_char_to_digit_mapping(word, mapping, ignored_chars):
+def encode_word_using_mapping(word, mapping, ignored_chars):
     """Represent given word as a string of digits according to the mapping
     given in the requirements.
 
