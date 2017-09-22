@@ -1,10 +1,9 @@
 import argparse
 import configparser
-from phone_numbers_encoder import encode_phone_numbers_file
-from encoding_scheme_builder import build_encoding
+from phone_numbers_encoder import encode_and_print_phone_numbers
 
 
-if __name__ == '__main__':
+def parse_arguments():
     # Default paths to read data from
     default_dictionary_path = 'docs/requirements/test_dictionary.txt'
     default_input_path = 'docs/requirements/test_input.txt'
@@ -35,7 +34,10 @@ if __name__ == '__main__':
              'sets of characters that will be ignored during encoding'
     )
     args = parser.parse_args()
+    return args
 
+
+def parse_config(config_path):
     # Read config file
     config = configparser.ConfigParser()
     config.read(args.config_path)
@@ -44,37 +46,35 @@ if __name__ == '__main__':
     # Get digit to character mapping from config
     mapping = {}
     for digit in config['MAPPING']:
-        mapping[digit] = config['MAPPING'][digit].split(config_list_separator)
+        mapping[digit] = set(
+            config['MAPPING'][digit].split(config_list_separator)
+        )
 
     # Get list of characters that will be ignored in words during encoding
-    dict_ignored_chars = \
+    ignored_dict_chars = \
         config['IGNORED_CHARACTERS']['in_dictionary']\
         .split(config_list_separator)
 
-    # Read dictionary file with words and map each word to the corresponding
-    # digit string using digit to character mapping
-    encoding = build_encoding(
-        args.dictionary_path,
-        mapping,
-        dict_ignored_chars
-    )
-
     # Get list of characters that will be ignored in phone number during
     # encoding process
-    phone_number_ignored_chars = \
+    ignored_phone_number_chars = \
         config['IGNORED_CHARACTERS']['in_phone_number']\
         .split(config_list_separator)
 
-    # For each encoding found print the phone number
-    # followed by a colon, a single(!) space, and the encoding on one line;
-    # trailing spaces are not allowed.
-    # (as per numberencoding.txt requirements)
-    for number_and_encoding in encode_phone_numbers_file(
-            input_path=args.input_path,
-            encoding=encoding,
-            ignored_chars=phone_number_ignored_chars):
+    setattr(config, 'mapping', mapping)
+    setattr(config, 'ignored_dict_chars', ignored_dict_chars)
+    setattr(config, 'ignored_phone_number_chars', ignored_phone_number_chars)
+    return config
 
-        original_number = number_and_encoding[0]
-        encoded_number = number_and_encoding[1]
 
-        print(original_number + ': ' + encoded_number)
+if __name__ == '__main__':
+    args = parse_arguments()
+    cfg = parse_config(args.config_path)
+
+    encode_and_print_phone_numbers(
+        dictionary_path=args.dictionary_path,
+        input_path=args.input_path,
+        digit_to_char_mapping=cfg.mapping,
+        ignored_dict_chars=cfg.ignored_dict_chars,
+        ignored_phone_number_chars=cfg.ignored_phone_number_chars
+    )
