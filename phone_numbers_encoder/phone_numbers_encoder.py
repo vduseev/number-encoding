@@ -1,33 +1,70 @@
-from encoding_scheme_builder import remove_characters
+from phone_numbers_encoder.encoding_scheme_builder import\
+    remove_characters, \
+    build_encoding_from_file
 
 
-def encode_phone_numbers_file(input_path, encoding, ignored_chars):
+def encode_and_print_phone_numbers(
+        dictionary_path,
+        input_path,
+        digit_to_char_mapping,
+        ignored_dict_chars,
+        ignored_phone_number_chars):
+
+    # Read dictionary file with words and map each word to the corresponding
+    # digit string using digit to character mapping
+    encoding = build_encoding_from_file(
+        path=dictionary_path,
+        given_mapping=digit_to_char_mapping,
+        ignored_dict_chars=ignored_dict_chars
+    )
+
+    # For each encoding found print the phone number
+    # followed by a colon, a single(!) space, and the encoding on one line;
+    # trailing spaces are not allowed.
+    # (as per numberencoding.txt requirements)
+    for number, encoded_number in encode_phone_numbers_file(
+            path=input_path,
+            encoding=encoding,
+            ignored_dict_chars=ignored_dict_chars,
+            ignored_phone_number_chars=ignored_phone_number_chars):
+
+        print(number + ': ' + encoded_number)
+
+
+def encode_phone_numbers_file(
+        path,
+        encoding,
+        ignored_dict_chars,
+        ignored_phone_number_chars):
     """Finds, for a given phone number, all possible encodings by words,
-    and yields original number with each encoding as a tuple
+    and yields original number with each possible encoding as a tuple
 
-    :param input_path: path to txt file with phone numbers
+    :param path: path to txt file with phone numbers
     :param encoding: encoding dictionary used to encode phone numbers
     :param ignored_chars: list of chars to be ignored when encoding the number
     :return:
     """
 
-    with open(input_path, mode='r') as dictionary_file:
-        for line in dictionary_file:
+    with open(path, mode='r') as phone_numbers_file:
+        for line in phone_numbers_file:
             number = line.rstrip('\r').rstrip('\n')
 
             # Only digits
-            only_digits_number = remove_characters(number, ignored_chars)
+            digit_string = remove_characters(
+                number,
+                ignored_phone_number_chars
+            )
 
             # Find possible encodings by words using built encoding
-            for encoded_number in _encode_phone_number(
-                    phone_number=only_digits_number,
+            for encoded_number in encode_digit_string(
+                    digit_string=digit_string,
                     encoding=encoding,
-                    ignored_chars=ignored_chars):
+                    ignored_dict_chars=ignored_dict_chars):
 
                 yield number, encoded_number
 
 
-def _encode_phone_number(phone_number, encoding, ignored_chars):
+def encode_digit_string(digit_string, encoding, ignored_dict_chars):
     """Yield each possible encoding for a phone number
 
     Encodings of phone numbers can consist of a single word or of multiple
@@ -38,7 +75,7 @@ def _encode_phone_number(phone_number, encoding, ignored_chars):
     allowed.
     (as per numberencoding.txt requirements)
 
-    :param phone_number:
+    :param digit_string:
     :param encoding:
     :return:
     """
@@ -54,11 +91,11 @@ def _encode_phone_number(phone_number, encoding, ignored_chars):
         # Partial encoding consists of several words separated by
         # space character. However, phone number parameter is given in
         # digits only, without any separators.
-        # Hence, spaces between words and other ignored character are
+        # Hence, spaces between words and other ignored dict character are
         # removed to correctly compare the lengths of phone number and
         # partial encoding.
         clean_partial_encoding = remove_characters(
-            partial_encoding, ignored_chars + [' ']
+            partial_encoding, ignored_dict_chars + [' ']
         )
         partial_encoding_length = len(clean_partial_encoding)
 
@@ -66,15 +103,15 @@ def _encode_phone_number(phone_number, encoding, ignored_chars):
         # then there are no more digits to be encoded.
         # Encoding is added to final result set. And it is not put back
         # in the queue.
-        if partial_encoding_length == len(phone_number):
+        if partial_encoding_length == len(digit_string):
             # encoded_numbers.add(partial_encoding)
             yield partial_encoding
             continue
 
         # Check what words fit into the part of the phone number
         # that is not encoded yet
-        fitting_words = _get_words_fitting_into_digit_string(
-            digit_string=phone_number[partial_encoding_length:],
+        fitting_words = get_words_fitting_into_digit_string(
+            digit_string=digit_string[partial_encoding_length:],
             encoding=encoding
         )
 
@@ -94,16 +131,16 @@ def _encode_phone_number(phone_number, encoding, ignored_chars):
         # When no fitting words are found then encode one symbol of
         # phone number with itself, but only if no fitting words are
         # found and last character of encoding is not a digit already.
-        if not _is_last_char_digit(partial_encoding):
+        if not is_last_char_digit(partial_encoding):
             partial_encoding_plus_digit = {
                 partial_encoding
                 + (' ' if len(partial_encoding) > 0 else '')
-                + phone_number[partial_encoding_length]
+                + digit_string[partial_encoding_length]
             }
             queue |= partial_encoding_plus_digit
 
 
-def _get_words_fitting_into_digit_string(digit_string, encoding):
+def get_words_fitting_into_digit_string(digit_string, encoding):
     """Takes a string consisting of digits and returns a set of words from
     encoding that fit into this string starting with the first character.
 
@@ -159,7 +196,7 @@ def _get_words_fitting_into_digit_string(digit_string, encoding):
     return fitting_words
 
 
-def _is_last_char_digit(string):
+def is_last_char_digit(string):
     if len(string) > 0:
         if string[-1].isdigit():
             return True
