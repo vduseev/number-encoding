@@ -1,11 +1,11 @@
 # number-encoding
----
+
 ## Requirements
-Can be found under `docs/requirements`
+Can be found under `docs/requirements/numberencoding.txt`
 
 ## Dependencies
 * `Python 3.6`
-* `py.test` to run tests (not required)
+* `py.test` to run tests (optional)
 
 ## Usage
 ```

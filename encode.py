@@ -33,14 +33,14 @@ def parse_arguments():
         help='path to config file with digit to char mapping and '
              'sets of characters that will be ignored during encoding'
     )
-    args = parser.parse_args()
-    return args
+    arguments = parser.parse_args()
+    return arguments
 
 
 def parse_config(config_path):
     # Read config file
     config = configparser.ConfigParser()
-    config.read(args.config_path)
+    config.read(config_path)
     config_list_separator = ', '
 
     # Get digit to character mapping from config

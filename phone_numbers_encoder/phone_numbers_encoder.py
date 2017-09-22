@@ -40,9 +40,12 @@ def encode_phone_numbers_file(
     and yields original number with each possible encoding as a tuple
 
     :param path: path to txt file with phone numbers
-    :param encoding: encoding dictionary used to encode phone numbers
-    :param ignored_chars: list of chars to be ignored when encoding the number
-    :return:
+    :param encoding: encoding dict used to encode phone numbers
+    :param ignored_dict_chars: list of chars to be ignored when encoding
+                               the word
+    :param ignored_phone_number_chars: list of chars to be ignored when encoding
+                                       the number
+    :return: yields each number and each possible encoding for it
     """
 
     with open(path, mode='r') as phone_numbers_file:
@@ -75,9 +78,11 @@ def encode_digit_string(digit_string, encoding, ignored_dict_chars):
     allowed.
     (as per numberencoding.txt requirements)
 
-    :param digit_string:
-    :param encoding:
-    :return:
+    :param digit_string: phone number string consisting only of digits
+    :param encoding: encoding dict used to encode phone numbers
+    :param ignored_dict_chars: list of chars to be ignored when encoding
+                               the word
+    :return: yields encoding one by one
     """
 
     # Queue of partial encodings; Initial value is fake and will not produce
@@ -174,9 +179,9 @@ def get_words_fitting_into_digit_string(digit_string, encoding):
        no encoding; '5' does not count; algorithm only look for the whole
        48245 string in encoding encoding_scheme_builder
 
-    :param digit_string:
-    :param encoding:
-    :return:
+    :param digit_string: phone number string consisting only of digits
+    :param encoding: encoding dict used to encode phone numbers
+    :return: set of fitting words from encoding
     """
 
     fitting_words = set()
